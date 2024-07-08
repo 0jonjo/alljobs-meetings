@@ -4,7 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.beans.BeanUtils;
 
 import com.alljobs.meetings.dtos.MeetingRecordDto;
@@ -16,8 +20,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
-
-
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 public class MeetingController {
@@ -28,6 +31,15 @@ public class MeetingController {
   @GetMapping("/meeting")
   public ResponseEntity<List<MeetingModel>> getAllMeetings(){
       return ResponseEntity.status(HttpStatus.OK).body(meetingRepository.findAll());
+  }
+
+  @GetMapping("/meeting/{id}")
+  public ResponseEntity<Object> getMeetingById(@PathVariable(value = "id") UUID id){
+      Optional<MeetingModel> meetingO = meetingRepository.findById(id);
+      if(meetingO.isEmpty()){
+          return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
+      }
+        return ResponseEntity.status(HttpStatus.OK).body(meetingO.get());
   }
 
   @PostMapping("/meeting")
