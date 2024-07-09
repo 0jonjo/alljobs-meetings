@@ -18,6 +18,7 @@ import com.alljobs.meetings.repositories.MeetingRepository;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,4 +49,15 @@ public class MeetingController {
       BeanUtils.copyProperties(meetingRecordDto, meetingModel);
       return ResponseEntity.status(HttpStatus.CREATED).body(meetingRepository.save(meetingModel));
   }
+
+  @PutMapping("/meeting/{id}")
+    public ResponseEntity<Object> updateMeeting(@PathVariable(value = "id") UUID id, @RequestBody MeetingRecordDto meetingRecordDto){
+        Optional<MeetingModel> meetingO = meetingRepository.findById(id);
+        if(meetingO.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
+        }
+        var meetingModel = meetingO.get();
+        BeanUtils.copyProperties(meetingRecordDto, meetingModel);
+        return ResponseEntity.status(HttpStatus.OK).body(meetingRepository.save(meetingModel));
+    }
 }
