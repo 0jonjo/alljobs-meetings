@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -59,5 +60,15 @@ public class MeetingController {
         var meetingModel = meetingO.get();
         BeanUtils.copyProperties(meetingRecordDto, meetingModel);
         return ResponseEntity.status(HttpStatus.OK).body(meetingRepository.save(meetingModel));
+    }
+
+  @DeleteMapping("/meeting/{id}")
+    public ResponseEntity<Object> deleteMeeting(@PathVariable(value = "id") UUID id){
+        Optional<MeetingModel> meetingO = meetingRepository.findById(id);
+        if(meetingO.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
+        }
+        meetingRepository.delete(meetingO.get());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Meeting deleted");
     }
 }
