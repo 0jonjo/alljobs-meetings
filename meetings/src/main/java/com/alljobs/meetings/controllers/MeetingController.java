@@ -69,6 +69,6 @@ public class MeetingController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
         }
         meetingRepository.delete(meetingO.get());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Meeting deleted");
+        return ResponseEntity.status(HttpStatus.OK).body("Meeting deleted successfully");
     }
 }
