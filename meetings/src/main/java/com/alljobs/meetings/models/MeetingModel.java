@@ -9,9 +9,11 @@ import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.springframework.hateoas.RepresentationModel;
+
 @Entity
 @Table(name = "meetings")
-public class MeetingModel implements Serializable {
+public class MeetingModel extends RepresentationModel<MeetingModel> implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Id

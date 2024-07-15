@@ -24,6 +24,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 public class MeetingController {
 
@@ -32,7 +35,14 @@ public class MeetingController {
 
   @GetMapping("/meeting")
   public ResponseEntity<List<MeetingModel>> getAllMeetings(){
-      return ResponseEntity.status(HttpStatus.OK).body(meetingRepository.findAll());
+      List<MeetingModel> meetingsList = meetingRepository.findAll();
+      if (!meetingsList.isEmpty()) {
+        for (MeetingModel meeting : meetingsList){
+            UUID id = meeting.getIdMeeting();
+            meeting.add(linkTo(methodOn(MeetingController.class).getMeetingById(id)).withSelfRel());
+        }
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(meetingsList);
   }
 
   @GetMapping("/meeting/{id}")
@@ -41,6 +51,7 @@ public class MeetingController {
       if(meetingO.isEmpty()){
           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
       }
+        meetingO.get().add(linkTo(methodOn(MeetingController.class).getAllMeetings()).withRel("All Meetings"));
         return ResponseEntity.status(HttpStatus.OK).body(meetingO.get());
   }
 
