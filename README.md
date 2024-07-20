@@ -1,6 +1,6 @@
 # Alljobs Meetings
 
-[![Java CI with Maven (Build)](https://github.com/0jonjo/alljobs-meetings/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/0jonjo/alljobs-meetings/actions/workflows/build.yaml)
+[![Java CI with Maven (Build)](https://github.com/0jonjo/alljobs-meetings/actions/workflows/build.yaml/badge.svg)](https://github.com/0jonjo/alljobs-meetings/actions/workflows/build.yaml)
 [![CodeQL](https://github.com/0jonjo/alljobs-meetings/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/0jonjo/alljobs-meetings/actions/workflows/github-code-scanning/codeql)
 
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
