@@ -30,7 +30,9 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Install dependencies
+        working-directory: meetings
         run: mvn -B dependency:go-offline
 
       - name: Build project
+        working-directory: meetings
         run: mvn -B clean package
