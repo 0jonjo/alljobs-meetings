@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "meetings")
