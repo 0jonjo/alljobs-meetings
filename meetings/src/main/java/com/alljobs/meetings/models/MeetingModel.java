@@ -8,10 +8,16 @@ import jakarta.persistence.Table;
 
 import java.io.Serializable;
 import java.util.UUID;
+import java.time.LocalDateTime;
+
+import org.springframework.hateoas.RepresentationModel;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "meetings")
-public class MeetingModel implements Serializable {
+public class MeetingModel extends RepresentationModel<MeetingModel> implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Id
@@ -19,6 +25,9 @@ public class MeetingModel implements Serializable {
   private UUID idMeeting;
   private Long user_id;
   private Long headhunter_id;
+  private LocalDateTime dateTime;
+  private String link;
+  private String status;
 
   public UUID getIdMeeting() {
     return idMeeting;
@@ -44,4 +53,29 @@ public class MeetingModel implements Serializable {
     this.headhunter_id = headhunter_id;
   }
 
+  @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+  public LocalDateTime getDateTime() {
+    return dateTime;
+  }
+
+  @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+  public void setDateTime(LocalDateTime dateTime) {
+    this.dateTime = dateTime;
+  }
+
+  public String getLink() {
+    return link;
+  }
+
+  public void setLink(String link) {
+    this.link = link;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
 }

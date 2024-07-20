@@ -4,7 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.beans.BeanUtils;
 
 import com.alljobs.meetings.dtos.MeetingRecordDto;
@@ -14,10 +18,14 @@ import com.alljobs.meetings.repositories.MeetingRepository;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
-
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class MeetingController {
@@ -27,7 +35,24 @@ public class MeetingController {
 
   @GetMapping("/meeting")
   public ResponseEntity<List<MeetingModel>> getAllMeetings(){
-      return ResponseEntity.status(HttpStatus.OK).body(meetingRepository.findAll());
+      List<MeetingModel> meetingsList = meetingRepository.findAll();
+      if (!meetingsList.isEmpty()) {
+        for (MeetingModel meeting : meetingsList){
+            UUID id = meeting.getIdMeeting();
+            meeting.add(linkTo(methodOn(MeetingController.class).getMeetingById(id)).withSelfRel());
+        }
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(meetingsList);
+  }
+
+  @GetMapping("/meeting/{id}")
+  public ResponseEntity<Object> getMeetingById(@PathVariable(value = "id") UUID id){
+      Optional<MeetingModel> meetingO = meetingRepository.findById(id);
+      if(meetingO.isEmpty()){
+          return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
+      }
+        meetingO.get().add(linkTo(methodOn(MeetingController.class).getAllMeetings()).withRel("All Meetings"));
+        return ResponseEntity.status(HttpStatus.OK).body(meetingO.get());
   }
 
   @PostMapping("/meeting")
@@ -36,4 +61,25 @@ public class MeetingController {
       BeanUtils.copyProperties(meetingRecordDto, meetingModel);
       return ResponseEntity.status(HttpStatus.CREATED).body(meetingRepository.save(meetingModel));
   }
+
+  @PutMapping("/meeting/{id}")
+    public ResponseEntity<Object> updateMeeting(@PathVariable(value = "id") UUID id, @RequestBody MeetingRecordDto meetingRecordDto){
+        Optional<MeetingModel> meetingO = meetingRepository.findById(id);
+        if(meetingO.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
+        }
+        var meetingModel = meetingO.get();
+        BeanUtils.copyProperties(meetingRecordDto, meetingModel);
+        return ResponseEntity.status(HttpStatus.OK).body(meetingRepository.save(meetingModel));
+    }
+
+  @DeleteMapping("/meeting/{id}")
+    public ResponseEntity<Object> deleteMeeting(@PathVariable(value = "id") UUID id){
+        Optional<MeetingModel> meetingO = meetingRepository.findById(id);
+        if(meetingO.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
+        }
+        meetingRepository.delete(meetingO.get());
+        return ResponseEntity.status(HttpStatus.OK).body("Meeting deleted successfully");
+    }
 }

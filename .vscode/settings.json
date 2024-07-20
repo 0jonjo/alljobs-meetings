@@ -1,6 +1,9 @@
 {
   "java.compile.nullAnalysis.mode": "automatic",
   "cSpell.words": [
-    "dtos"
-  ]
+    "dtos",
+    "hateoas",
+    "springframework"
+  ],
+  "java.configuration.updateBuildConfiguration": "interactive"
 }
