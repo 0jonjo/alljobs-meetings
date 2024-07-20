@@ -1,4 +1,4 @@
-# ALLJOBS-MEETINGS
+# ALLJOBS-MEETINGS [![Java CI with Maven (Build)](https://github.com/0jonjo/alljobs-meetings/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/0jonjo/alljobs-meetings/actions/workflows/build.yaml)
 
 Spring Boot Rest API to create meetings between Headhunters and Users. Part of Alljobs project.
 
