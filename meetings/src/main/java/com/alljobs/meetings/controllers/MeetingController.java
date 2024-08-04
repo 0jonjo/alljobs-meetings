@@ -1,6 +1,7 @@
 package com.alljobs.meetings.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +14,9 @@ import org.springframework.beans.BeanUtils;
 
 import com.alljobs.meetings.dtos.MeetingRecordDto;
 import com.alljobs.meetings.models.MeetingModel;
+import com.alljobs.meetings.repositories.HeadhunterRepository;
 import com.alljobs.meetings.repositories.MeetingRepository;
+import com.alljobs.meetings.repositories.UserRepository;
 import com.alljobs.meetings.service.MeetingService;
 
 import jakarta.validation.Valid;
@@ -33,6 +36,8 @@ public class MeetingController {
 
     @Autowired
     MeetingRepository meetingRepository;
+    UserRepository userRepository;
+    HeadhunterRepository headhunterRepository;
 
     final MeetingService meetingService;
 
@@ -65,6 +70,14 @@ public class MeetingController {
     @PostMapping("/meeting")
     public ResponseEntity<Object> createMeeting(@Valid @RequestBody MeetingRecordDto meetingRecordDto) {
         var meetingModel = new MeetingModel();
+        var user = meetingService.checkUserExist(meetingRecordDto.user_id());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        var headhunter = meetingService.checkHeadhunterExist(meetingRecordDto.headhunter_id());
+        if (headhunter == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Headhunter not found");
+        }
         BeanUtils.copyProperties(meetingRecordDto, meetingModel);
         return ResponseEntity.status(HttpStatus.CREATED).body(meetingService.saveMeeting(meetingModel));
     }
@@ -75,6 +88,14 @@ public class MeetingController {
         var meetingModel = meetingService.getMeetingById(id);
         if (meetingModel == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
+        }
+        var user = meetingService.checkUserExist(meetingRecordDto.user_id());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        var headhunter = meetingService.checkHeadhunterExist(meetingRecordDto.headhunter_id());
+        if (headhunter == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Headhunter not found");
         }
         BeanUtils.copyProperties(meetingRecordDto, meetingModel);
         return ResponseEntity.status(HttpStatus.OK).body(meetingService.updateMeeting(meetingModel));
