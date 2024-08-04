@@ -1,6 +1,7 @@
 package com.alljobs.meetings.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +14,10 @@ import org.springframework.beans.BeanUtils;
 
 import com.alljobs.meetings.dtos.MeetingRecordDto;
 import com.alljobs.meetings.models.MeetingModel;
+import com.alljobs.meetings.repositories.HeadhunterRepository;
 import com.alljobs.meetings.repositories.MeetingRepository;
+import com.alljobs.meetings.repositories.UserRepository;
+import com.alljobs.meetings.service.MeetingService;
 
 import jakarta.validation.Valid;
 
@@ -30,56 +34,81 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 public class MeetingController {
 
-  @Autowired
-  MeetingRepository meetingRepository;
+    @Autowired
+    MeetingRepository meetingRepository;
+    UserRepository userRepository;
+    HeadhunterRepository headhunterRepository;
 
-  @GetMapping("/meeting")
-  public ResponseEntity<List<MeetingModel>> getAllMeetings(){
-      List<MeetingModel> meetingsList = meetingRepository.findAll();
-      if (!meetingsList.isEmpty()) {
-        for (MeetingModel meeting : meetingsList){
-            UUID id = meeting.getIdMeeting();
-            meeting.add(linkTo(methodOn(MeetingController.class).getMeetingById(id)).withSelfRel());
-        }
-      }
-      return ResponseEntity.status(HttpStatus.OK).body(meetingsList);
-  }
+    final MeetingService meetingService;
 
-  @GetMapping("/meeting/{id}")
-  public ResponseEntity<Object> getMeetingById(@PathVariable(value = "id") UUID id){
-      Optional<MeetingModel> meetingO = meetingRepository.findById(id);
-      if(meetingO.isEmpty()){
-          return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
-      }
-        meetingO.get().add(linkTo(methodOn(MeetingController.class).getAllMeetings()).withRel("All Meetings"));
-        return ResponseEntity.status(HttpStatus.OK).body(meetingO.get());
-  }
-
-  @PostMapping("/meeting")
-  public ResponseEntity<MeetingModel> saveMeeting(@RequestBody @Valid MeetingRecordDto meetingRecordDto) {
-      var meetingModel = new MeetingModel();
-      BeanUtils.copyProperties(meetingRecordDto, meetingModel);
-      return ResponseEntity.status(HttpStatus.CREATED).body(meetingRepository.save(meetingModel));
-  }
-
-  @PutMapping("/meeting/{id}")
-    public ResponseEntity<Object> updateMeeting(@PathVariable(value = "id") UUID id, @RequestBody MeetingRecordDto meetingRecordDto){
-        Optional<MeetingModel> meetingO = meetingRepository.findById(id);
-        if(meetingO.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
-        }
-        var meetingModel = meetingO.get();
-        BeanUtils.copyProperties(meetingRecordDto, meetingModel);
-        return ResponseEntity.status(HttpStatus.OK).body(meetingRepository.save(meetingModel));
+    public MeetingController(MeetingService meetingService) {
+        this.meetingService = meetingService;
     }
 
-  @DeleteMapping("/meeting/{id}")
-    public ResponseEntity<Object> deleteMeeting(@PathVariable(value = "id") UUID id){
-        Optional<MeetingModel> meetingO = meetingRepository.findById(id);
-        if(meetingO.isEmpty()){
+    @GetMapping("/meeting")
+    public ResponseEntity<List<MeetingModel>> getAllMeetings() {
+        List<MeetingModel> meetingsList = meetingService.getAllMeetings();
+        if (!meetingsList.isEmpty()) {
+            for (MeetingModel meeting : meetingsList) {
+                UUID id = meeting.getIdMeeting();
+                meeting.add(linkTo(methodOn(MeetingController.class).getMeetingById(id)).withSelfRel());
+            }
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(meetingsList);
+    }
+
+    @GetMapping("/meeting/{id}")
+    public ResponseEntity<Object> getMeetingById(@PathVariable(value = "id") UUID id) {
+        var meetingModel = meetingService.getMeetingById(id);
+        if (meetingModel == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
         }
-        meetingRepository.delete(meetingO.get());
+        meetingModel.add(linkTo(methodOn(MeetingController.class).getAllMeetings()).withRel("All Meetings"));
+        return ResponseEntity.status(HttpStatus.OK).body(meetingModel);
+    }
+
+    @PostMapping("/meeting")
+    public ResponseEntity<Object> createMeeting(@Valid @RequestBody MeetingRecordDto meetingRecordDto) {
+        var meetingModel = new MeetingModel();
+        var user = meetingService.checkUserExist(meetingRecordDto.user_id());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        var headhunter = meetingService.checkHeadhunterExist(meetingRecordDto.headhunter_id());
+        if (headhunter == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Headhunter not found");
+        }
+        BeanUtils.copyProperties(meetingRecordDto, meetingModel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(meetingService.saveMeeting(meetingModel));
+    }
+
+    @PutMapping("/meeting/{id}")
+    public ResponseEntity<Object> updateMeeting(@PathVariable(value = "id") UUID id,
+            @RequestBody MeetingRecordDto meetingRecordDto) {
+        var meetingModel = meetingService.getMeetingById(id);
+        if (meetingModel == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
+        }
+        var user = meetingService.checkUserExist(meetingRecordDto.user_id());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        var headhunter = meetingService.checkHeadhunterExist(meetingRecordDto.headhunter_id());
+        if (headhunter == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Headhunter not found");
+        }
+        BeanUtils.copyProperties(meetingRecordDto, meetingModel);
+        return ResponseEntity.status(HttpStatus.OK).body(meetingService.updateMeeting(meetingModel));
+    }
+
+    @DeleteMapping("/meeting/{id}")
+    public ResponseEntity<Object> deleteMeeting(@PathVariable(value = "id") UUID id,
+            @RequestBody MeetingRecordDto meetingRecordDto) {
+        var meetingModel = meetingService.getMeetingById(id);
+        if (meetingModel == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meeting not found");
+        }
+        meetingRepository.delete(meetingModel);
         return ResponseEntity.status(HttpStatus.OK).body("Meeting deleted successfully");
     }
 }

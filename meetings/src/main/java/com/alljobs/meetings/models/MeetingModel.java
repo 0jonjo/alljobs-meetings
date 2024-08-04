@@ -52,12 +52,12 @@ public class MeetingModel extends RepresentationModel<MeetingModel> implements S
     this.headhunter_id = headhunter_id;
   }
 
-  @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
   public LocalDateTime getDateTime() {
     return dateTime;
   }
 
-  @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
   public void setDateTime(LocalDateTime dateTime) {
     this.dateTime = dateTime;
   }
