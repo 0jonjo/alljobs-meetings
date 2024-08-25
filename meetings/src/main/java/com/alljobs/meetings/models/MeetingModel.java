@@ -24,9 +24,12 @@ public class MeetingModel extends RepresentationModel<MeetingModel> implements S
   private UUID idMeeting;
   private Long user_id;
   private Long headhunter_id;
-  private LocalDateTime dateTime;
+  private LocalDateTime startMeeting;
+  private LocalDateTime endMeeting;
   private String link;
   private String status;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 
   public UUID getIdMeeting() {
     return idMeeting;
@@ -52,14 +55,20 @@ public class MeetingModel extends RepresentationModel<MeetingModel> implements S
     this.headhunter_id = headhunter_id;
   }
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
-  public LocalDateTime getDateTime() {
-    return dateTime;
+  public LocalDateTime getStartMeeting() {
+    return startMeeting;
   }
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
-  public void setDateTime(LocalDateTime dateTime) {
-    this.dateTime = dateTime;
+  public void setStartMeeting(LocalDateTime startMeeting) {
+    this.startMeeting = startMeeting;
+  }
+
+  public LocalDateTime getEndMeeting() {
+    return endMeeting;
+  }
+
+  public void setEndMeeting(LocalDateTime endMeeting) {
+    this.endMeeting = endMeeting;
   }
 
   public String getLink() {
@@ -76,5 +85,21 @@ public class MeetingModel extends RepresentationModel<MeetingModel> implements S
 
   public void setStatus(String status) {
     this.status = status;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
   }
 }
